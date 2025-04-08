@@ -1,23 +1,22 @@
 USE sakila;
 
 -- List all the actors that share the last name. Show them in order
-SELECT ac.first_name, ac.last_name 
-FROM actor ac
-WHERE last_name IN (
-    SELECT last_name
-    FROM actor
-    GROUP BY last_name
-    HAVING COUNT(*) > 1
+SELECT a.actor_id, a.first_name, a.last_name
+FROM actor a
+WHERE EXISTS (
+    SELECT *
+    FROM actor b
+    WHERE b.last_name = a.last_name
+      AND b.actor_id != a.actor_id
 )
-ORDER BY last_name, first_name;
+ORDER BY a.last_name, a.first_name;
 
 -- Find actors that don't work in any film
-SELECT ac.actor_id, ac.first_name, ac.last_name
-FROM actor ac
-WHERE NOT EXISTS (
-    SELECT 1 
-    FROM film_actor fa 
-    WHERE fa.actor_id = ac.actor_id
+SELECT actor_id, first_name, last_name
+FROM actor
+WHERE actor_id NOT IN (
+  SELECT actor_id
+  FROM film_actor
 );
 
 -- Find customers that rented only one film
@@ -51,42 +50,40 @@ WHERE last_name IN (
 ORDER BY ac.last_name, ac.first_name;
 
 -- List the actors that acted in 'BETRAYED REAR' but not in 'CATCH AMISTAD'
-SELECT ac.first_name, ac.last_name 
-FROM actor ac
-WHERE EXISTS (
-    SELECT 1
-    FROM film_actor fa
-    JOIN film f ON fa.film_id = f.film_id
-    WHERE fa.actor_id = ac.actor_id
-    AND f.title = 'BETRAYED REAR'
+SELECT first_name, last_name 
+FROM actor
+WHERE actor_id IN (
+  SELECT actor_id
+  FROM film_actor
+  WHERE film_id = (
+    SELECT film_id FROM film WHERE title = 'BETRAYED REAR'
+  )
 )
-AND NOT EXISTS (
-    SELECT 1
-    FROM film_actor fa
-    JOIN film f ON fa.film_id = f.film_id
-    WHERE fa.actor_id = ac.actor_id
-    AND f.title = 'CATCH AMISTAD'
-)
-ORDER BY ac.last_name, ac.first_name;
+AND actor_id NOT IN(
+  SELECT actor_id
+  FROM film_actor
+  WHERE film_id = (
+    SELECT film_id FROM film WHERE title = 'CATCH AMISTAD'
+  )
+);
 
 -- List the actors that acted in both 'BETRAYED REAR' and 'CATCH AMISTAD'
-SELECT ac.first_name, ac.last_name 
-FROM actor ac
-WHERE EXISTS (
-    SELECT 1
-    FROM film_actor fa
-    JOIN film f ON fa.film_id = f.film_id
-    WHERE fa.actor_id = ac.actor_id
-    AND f.title = 'BETRAYED REAR'
+SELECT first_name, last_name 
+FROM actor
+WHERE actor_id IN (
+  SELECT actor_id
+  FROM film_actor
+  WHERE film_id = (
+    SELECT film_id FROM film WHERE title = 'BETRAYED REAR'
+  )
 )
-AND EXISTS (
-    SELECT 1
-    FROM film_actor fa
-    JOIN film f ON fa.film_id = f.film_id
-    WHERE fa.actor_id = ac.actor_id
-    AND f.title = 'CATCH AMISTAD'
-)
-ORDER BY ac.last_name, ac.first_name;
+AND actor_id IN(
+  SELECT actor_id
+  FROM film_actor
+  WHERE film_id = (
+    SELECT film_id FROM film WHERE title = 'CATCH AMISTAD'
+  )
+);
 
 -- List all the actors that didn't work in 'BETRAYED REAR' or 'CATCH AMISTAD'
 SELECT ac.first_name, ac.last_name 
