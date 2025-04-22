@@ -57,7 +57,7 @@ SELECT
     a.address,
     (
         SELECT MIN(p1.amount)
-        FROM payment p1
+        FROM payment p1 
         WHERE p1.customer_id = c.customer_id
     ) AS lowest_payment,
     (
