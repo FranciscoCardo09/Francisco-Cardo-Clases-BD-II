@@ -1,3 +1,4 @@
+USE sakila;
 -- 1: Insert a new employee to , but with an null email. Explain what happens.
 
 -- Tabla:
@@ -132,7 +133,7 @@ CREATE TRIGGER upd_film AFTER UPDATE ON film
 FOR EACH ROW
 BEGIN
   IF (OLD.title != NEW.title)
-     OR (OLD.description != NEW.description)
+     OR (OLD.description != NEW.airpods maxdescription)
      OR (OLD.film_id != NEW.film_id) THEN
     UPDATE film_text
     SET title = NEW.title,
